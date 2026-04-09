@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#050d1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BrokerOS">
+<meta property="og:title" content="BrokerOS — Fintech CRM для брокеров">
+<meta property="og:description" content="Профессиональная CRM система для брокеров. Лиды, заявки в банки, сделки и комиссии — всё в одном месте.">
+<meta property="og:image" content="https://sunkar-finance-astana.github.io/BrokerOS-/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://sunkar-finance-astana.github.io/BrokerOS-/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BrokerOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BrokerOS — Fintech CRM для брокеров">
+<meta name="twitter:description" content="Профессиональная CRM система для брокеров.">
+<meta name="twitter:image" content="https://sunkar-finance-astana.github.io/BrokerOS-/og-image.jpg">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>BrokerOS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#050d1e;--bg2:#0a1628;--bg3:#0f1f3a;--bg4:#162847;
+--blue:#1a6dff;--blue2:#1558e0;--blue3:#4d8fff;--blue4:rgba(26,109,255,.12);
+--cyan:#00c2ff;--green:#00d68f;--red:#ff4757;--yellow:#ffd32a;--purple:#a855f7;
+--t:#f0f4ff;--t2:#7a8fb5;--t3:#3d5175;
+--bd:rgba(255,255,255,.055);--bd2:rgba(255,255,255,.1);
+--r:18px;--rs:12px;--rx:8px;
+}
+body{background:var(--bg);color:var(--t);font-family:'Nunito',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+input,select,textarea,button{font-family:inherit;outline:none;border:none;background:none}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s,transform .6s}
+#splash.hide{opacity:0;pointer-events:none;transform:scale(1.04)}
+.sp-logo{width:190px;animation:spIn .9s cubic-bezier(.34,1.56,.64,1) both}
+.sp-line{width:1px;height:0;background:linear-gradient(to bottom,transparent,var(--blue),transparent);margin-top:36px;animation:spLine .7s .5s ease forwards}
+.sp-txt{font-size:10px;letter-spacing:5px;color:var(--t3);text-transform:uppercase;margin-top:14px;opacity:0;animation:spUp .6s 1s ease forwards;font-weight:700}
+@keyframes spIn{from{opacity:0;transform:scale(.7) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes spLine{to{height:56px;opacity:1}}
+@keyframes spUp{to{opacity:1;transform:translateY(0)}}
+
+/* LOGIN */
+#login{min-height:100vh;display:none;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+#login.show{display:flex}
+.lg-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(26,109,255,.1) 0,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.lg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(26,109,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(26,109,255,.025) 1px,transparent 1px);background-size:50px 50px;pointer-events:none}
+.lcard{position:relative;z-index:1;width:100%;max-width:400px;margin:20px;background:var(--bg2);border:1px solid var(--bd2);border-radius:28px;padding:42px 34px;box-shadow:0 40px 100px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05)}
+.lcard-logo{display:block;width:170px;margin:0 auto 30px;filter:drop-shadow(0 4px 20px rgba(26,109,255,.3))}
+.lcard-div{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.lcard-div::before,.lcard-div::after{content:'';flex:1;height:1px;background:var(--bd)}
+.lcard-div span{font-size:11px;color:var(--t3);font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+.lcard-err{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);border-radius:var(--rx);padding:11px 14px;font-size:13px;color:#ff8a95;display:none;margin-bottom:12px;font-weight:700}
+.fi-wrap{position:relative;margin-bottom:12px}
+.fi-ico{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;width:18px;height:18px}
+.fi{width:100%;background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--rs);padding:14px 15px 14px 44px;color:var(--t);font-size:15px;font-weight:600;transition:all .2s}
+.fi:focus{border-color:var(--blue);background:var(--bg4);box-shadow:0 0 0 4px rgba(26,109,255,.1)}
+.fi::placeholder{color:var(--t3);font-weight:500}
+.btn-login{width:100%;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border-radius:var(--rs);padding:16px;font-size:16px;font-weight:900;margin-top:6px;transition:all .25s;box-shadow:0 8px 28px rgba(26,109,255,.45),inset 0 1px 0 rgba(255,255,255,.15);letter-spacing:.3px}
+.btn-login:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(26,109,255,.55)}
+.btn-login:disabled{opacity:.6;transform:none;cursor:not-allowed}
+.lcard-foot{text-align:center;font-size:12px;color:var(--t3);margin-top:18px;font-weight:600;letter-spacing:.5px}
+
+/* APP */
+#app{display:none}
+.layout{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sb{width:256px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:300;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.sb-hd{padding:22px 20px 16px;border-bottom:1px solid var(--bd)}
+.sb-logo{width:130px;height:auto;filter:drop-shadow(0 2px 12px rgba(26,109,255,.25))}
+.sb-usr{padding:14px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px}
+.ava{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0}
+.av-admin{background:linear-gradient(135deg,#7c3aed,#a855f7);box-shadow:0 4px 14px rgba(168,85,247,.4)}
+.av-broker{background:linear-gradient(135deg,var(--blue),var(--cyan));box-shadow:0 4px 14px rgba(26,109,255,.4)}
+.av-bank{background:linear-gradient(135deg,#059669,var(--green));box-shadow:0 4px 14px rgba(0,214,143,.4)}
+.sb-nm{font-weight:800;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-rl{font-size:11px;color:var(--t2);margin-top:2px;font-weight:600}
+.sb-nav{flex:1;overflow-y:auto;padding:10px 12px;scrollbar-width:none}
+.sb-nav::-webkit-scrollbar{display:none}
+.nav-sec{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);padding:14px 8px 6px;font-weight:700}
+.nav-i{display:flex;align-items:center;gap:11px;padding:11px 12px;cursor:pointer;font-size:14px;font-weight:700;color:var(--t2);border-radius:var(--rs);transition:all .15s;margin-bottom:2px}
+.nav-i:hover{color:var(--t);background:rgba(255,255,255,.04)}
+.nav-i.on{color:#fff;background:var(--blue4);box-shadow:inset 2px 0 0 var(--blue)}
+.nav-i svg{width:17px;height:17px;flex-shrink:0;opacity:.7}
+.nav-i.on svg{opacity:1}
+.sb-ft{padding:16px 20px;border-top:1px solid var(--bd)}
+.btn-out{width:100%;background:rgba(255,71,87,.07);border:1px solid rgba(255,71,87,.2);border-radius:var(--rx);padding:11px;color:var(--red);font-size:13px;font-weight:800;transition:all .2s}
+.btn-out:hover{background:rgba(255,71,87,.14);border-color:rgba(255,71,87,.4)}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);z-index:250}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;background:rgba(5,13,30,.88);backdrop-filter:blur(24px);border-bottom:1px solid var(--bd);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;z-index:200}
+.tb-l{display:flex;align-items:center;gap:14px}
+.mb{background:none;border:1px solid var(--bd2);border-radius:10px;padding:9px;display:none;color:var(--t2)}
+.mb svg{width:18px;height:18px;display:block}
+.tb-ttl{font-size:17px;font-weight:900;letter-spacing:-.3px}
+
+/* MAIN */
+.main{margin-left:256px;min-height:100vh;flex:1}
+.page{padding:24px;display:none;animation:pgIn .22s ease both}
+.page.on{display:block}
+@keyframes pgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px}
+.stat{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:transform .2s}
+.stat:hover{transform:translateY(-2px)}
+.sg{position:absolute;top:-40px;right:-40px;width:100px;height:100px;border-radius:50%;opacity:.18;filter:blur(24px)}
+.si{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.si svg{width:17px;height:17px}
+.sv{font-size:26px;font-weight:900;letter-spacing:-1px;line-height:1}
+.sl{font-size:12px;color:var(--t2);margin-top:6px;font-weight:700}
+.s-b .sg,.s-b .si{background:var(--blue)}.s-b .si{background:rgba(26,109,255,.15);color:var(--blue3)}
+.s-g .sg{background:var(--green)}.s-g .si{background:rgba(0,214,143,.15);color:var(--green)}
+.s-y .sg{background:var(--yellow)}.s-y .si{background:rgba(255,211,42,.15);color:var(--yellow)}
+.s-p .sg{background:var(--purple)}.s-p .si{background:rgba(168,85,247,.15);color:var(--purple)}
+
+/* SECTION */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sec-ttl{font-size:16px;font-weight:900;letter-spacing:-.3px}
+.sec-sub{font-size:12px;color:var(--t2);font-weight:600;margin-top:2px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--rs);font-size:13px;font-weight:800;transition:all .2s;white-space:nowrap}
+.btn svg{width:15px;height:15px;flex-shrink:0}
+.btn-b{background:var(--blue);color:#fff;box-shadow:0 4px 16px rgba(26,109,255,.35)}
+.btn-b:hover{background:var(--blue2);transform:translateY(-1px)}
+.btn-gh{background:var(--bg3);border:1px solid var(--bd2);color:var(--t2)}
+.btn-gh:hover{color:var(--t);border-color:var(--blue3)}
+.btn-gn{background:rgba(0,214,143,.1);border:1px solid rgba(0,214,143,.25);color:var(--green)}
+.btn-gn:hover{background:rgba(0,214,143,.18)}
+.btn-sm{padding:8px 14px;font-size:12px}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800;white-space:nowrap}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.b-new{background:rgba(122,143,181,.15);color:var(--t2)}
+.b-taken{background:rgba(26,109,255,.15);color:var(--blue3)}
+.b-sent{background:rgba(168,85,247,.15);color:var(--purple)}
+.b-offered{background:rgba(0,214,143,.15);color:var(--green)}
+.b-approved{background:rgba(0,214,143,.15);color:var(--green)}
+.b-closed{background:rgba(168,85,247,.2);color:#c084fc}
+.b-rejected{background:rgba(255,71,87,.15);color:var(--red)}
+.b-in_progress{background:rgba(26,109,255,.15);color:var(--blue3)}
+.b-platform{background:rgba(255,211,42,.15);color:var(--yellow)}
+.b-external{background:rgba(26,109,255,.12);color:var(--blue3)}
+
+/* LEAD CARD */
+.lc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px 20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;margin-bottom:10px}
+.lc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.lc.s-new::before{background:var(--t3)}.lc.s-taken::before,.lc.s-in_progress::before{background:var(--blue)}
+.lc.s-sent::before{background:var(--purple)}.lc.s-offered::before,.lc.s-approved::before{background:var(--green)}
+.lc.s-closed::before{background:#a855f7}.lc.s-rejected::before{background:var(--red)}
+.lc:hover{border-color:var(--bd2);transform:translateX(2px);box-shadow:0 4px 20px rgba(0,0,0,.25)}
+.lc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.lc-nm{font-weight:800;font-size:15px;letter-spacing:-.3px}
+.lc-dt{font-size:12px;color:var(--t2);margin-top:3px;font-weight:600}
+.lc-amt{font-weight:900;font-size:17px;color:var(--blue3);letter-spacing:-.5px}
+.lc-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lc-act{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+
+/* FUNNEL CHIPS */
+.funnel{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.funnel::-webkit-scrollbar{display:none}
+.fchip{flex-shrink:0;padding:8px 14px;border-radius:20px;background:var(--bg3);border:1px solid var(--bd);font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;color:var(--t2)}
+.fchip:hover{border-color:var(--bd2);color:var(--t)}
+.fchip.on{background:var(--blue4);border-color:var(--blue);color:#fff}
+
+/* MODAL */
+.mw{display:none;position:fixed;inset:0;z-index:600;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.72);backdrop-filter:blur(6px)}
+.mw.show{display:flex;animation:mbg .2s ease}
+@keyframes mbg{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg2);border-radius:28px 28px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;padding:20px 24px 40px;border-top:1px solid var(--bd2);animation:msl .3s cubic-bezier(.34,1.1,.64,1)}
+@keyframes msl{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mhandle{width:40px;height:4px;border-radius:2px;background:var(--bd2);margin:0 auto 20px}
+.mtitle{font-size:19px;font-weight:900;margin-bottom:20px;letter-spacing:-.4px;display:flex;align-items:center;justify-content:space-between}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg.full{grid-column:1/-1}
+label{font-size:11px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.8px}
+.inp{background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--rs);padding:13px 15px;color:var(--t);font-size:14px;font-weight:600;width:100%;transition:all .2s}
+.inp:focus{border-color:var(--blue);background:var(--bg4);box-shadow:0 0 0 4px rgba(26,109,255,.1)}
+.inp::placeholder{color:var(--t3);font-weight:500}
+select.inp option{background:var(--bg3)}
+textarea.inp{resize:vertical;min-height:76px}
+.btn-sub{width:100%;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border-radius:var(--rs);padding:16px;font-size:15px;font-weight:900;margin-top:20px;transition:all .2s;box-shadow:0 6px 24px rgba(26,109,255,.4)}
+.btn-sub:hover{transform:translateY(-2px)}
+.btn-sub:disabled{opacity:.6;transform:none}
+.cx{background:var(--bg3);border:1px solid var(--bd);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);font-size:16px;flex-shrink:0}
+.cx:hover{color:var(--t)}
+
+/* PANEL */
+.pw{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.65);backdrop-filter:blur(4px)}
+.pw.show{display:flex;align-items:stretch;justify-content:flex-end;animation:pbg .2s ease}
+@keyframes pbg{from{opacity:0}to{opacity:1}}
+.panel{width:100%;max-width:500px;background:var(--bg2);border-left:1px solid var(--bd2);overflow-y:auto;animation:psl .28s cubic-bezier(.4,0,.2,1)}
+@keyframes psl{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+.ph{padding:18px 24px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1}
+.pt{font-size:17px;font-weight:900;letter-spacing:-.3px}
+.pb{padding:20px 24px}
+
+/* DETAIL GRID */
+.dig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.di{background:var(--bg3);border-radius:var(--rs);padding:14px}
+.di-l{font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.di-v{font-size:14px;font-weight:700}
+.di.full{grid-column:1/-1}
+
+/* OFFER */
+.oc{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:16px;margin-bottom:10px;transition:all .2s}
+.oc.sel{border-color:var(--green);background:rgba(0,214,143,.05)}
+.ot{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ob{font-weight:900;font-size:15px}
+.os{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.oi{text-align:center}
+.oi-l{font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.oi-v{font-size:14px;font-weight:900}
+
+/* DEAL */
+.dc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin-bottom:12px}
+.dc-t{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.dc-nm{font-weight:900;font-size:15px}
+.dc-sr{font-size:12px;color:var(--t2);margin-top:3px;font-weight:700}
+.cs-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.cs-i{background:var(--bg3);border-radius:var(--rs);padding:14px;text-align:center}
+.cs-l{font-size:10px;color:var(--t2);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.cs-v{font-size:15px;font-weight:900}
+.cs-v.g{color:var(--green)}.cs-v.b{color:var(--blue3)}
+
+/* STATUS BTNS */
+.st-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.stb{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:800;border:1.5px solid var(--bd);color:var(--t2);transition:all .2s;background:var(--bg3)}
+.stb:hover{border-color:var(--bd2);color:var(--t)}
+.stb.on{border-color:var(--blue);background:var(--blue4);color:#fff}
+
+/* COMM PREVIEW */
+.cp{background:var(--bg3);border-radius:var(--rs);padding:16px;margin:16px 0;display:none}
+.cp-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cp-i{background:var(--bg4);border-radius:var(--rx);padding:12px;text-align:center}
+.cp-l{font-size:10px;color:var(--t2);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.cp-v{font-size:14px;font-weight:900}
+.cp-v.g{color:var(--green)}.cp-v.b{color:var(--blue3)}
+
+/* WA */
+.wa{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:var(--rs);background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);color:#25d366;font-size:13px;font-weight:800}
+.wa:hover{background:rgba(37,211,102,.18)}
+.wa svg{width:14px;height:14px}
+
+/* TABLE */
+.tbl-w{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bd)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;padding:11px 16px;font-size:11px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--bd);background:var(--bg3)}
+td{padding:13px 16px;border-bottom:1px solid var(--bd)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.015)}
+
+/* UPLOAD */
+.uz{border:2px dashed var(--bd2);border-radius:var(--rs);padding:20px;text-align:center;cursor:pointer;transition:all .2s;color:var(--t2);font-size:14px;font-weight:600}
+.uz:hover{border-color:var(--blue);color:var(--blue3);background:var(--blue4)}
+.fi-item{display:flex;align-items:center;gap:10px;background:var(--bg3);border-radius:var(--rx);padding:10px 12px;margin-top:8px;font-size:13px;font-weight:700}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px}
+.empty-i{font-size:48px;margin-bottom:12px}
+.empty-t{font-size:16px;font-weight:900;margin-bottom:6px}
+.empty-s{font-size:14px;color:var(--t2);font-weight:600}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--bg3);border:1px solid var(--bd2);border-radius:14px;padding:12px 22px;font-size:14px;font-weight:800;opacity:0;transition:all .3s cubic-bezier(.34,1.3,.64,1);z-index:1000;pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(0,214,143,.4);color:var(--green)}
+.toast.err{border-color:rgba(255,71,87,.4);color:var(--red)}
+.toast.info{border-color:rgba(26,109,255,.4);color:var(--blue3)}
+
+/* MOBILE */
+@media(max-width:768px){
+.sb{transform:translateX(-100%)}.sb.open{transform:translateX(0)}
+.ov.open{display:block}.main{margin-left:0}.mb{display:flex}
+.fr{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}
+.dig{grid-template-columns:1fr 1fr}.cs-wrap,.cp-g{grid-template-columns:1fr}
+.panel{max-width:100%}.page{padding:16px}.topbar{padding:0 16px}
+}
+@media(max-width:380px){.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <img class="sp-logo" src="data:image/png;base64,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" alt="BrokerOS">
+  <div class="sp-line"></div>
+  <div class="sp-txt">Fintech CRM Platform</div>
+</div>
+
+<div id="login">
+  <div class="lg-glow"></div>
+  <div class="lg-grid"></div>
+  <div class="lcard">
+    <img class="lcard-logo" src="data:image/png;base64,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" alt="BrokerOS">
+    <div class="lcard-div"><span>Вход в систему</span></div>
+    <div id="lgErr" class="lcard-err"></div>
+    <div class="fi-wrap">
+      <svg class="fi-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <input class="fi" type="email" id="em" placeholder="email@brokeros.kz" autocomplete="email">
+    </div>
+    <div class="fi-wrap">
+      <svg class="fi-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <input class="fi" type="password" id="pw" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="lBtn">Войти в BrokerOS</button>
+    <div class="lcard-foot">Доступ только для участников платформы</div>
+  </div>
+</div>
+
+<div id="app">
+<div class="layout">
+<div class="ov" id="ov"></div>
+<div class="sb" id="sb">
+  <div class="sb-hd"><img class="sb-logo" src="data:image/png;base64,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" alt="BrokerOS"></div>
+  <div class="sb-usr"><div class="ava" id="sbAv"></div><div><div class="sb-nm" id="sbNm"></div><div class="sb-rl" id="sbRl"></div></div></div>
+  <nav class="sb-nav" id="sbNav"></nav>
+  <div class="sb-ft"><button class="btn-out" id="btnOut">Выйти из системы</button></div>
+</div>
+<div class="main">
+  <div class="topbar">
+    <div class="tb-l">
+      <button class="mb" id="menuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="tb-ttl" id="tbT">Дашборд</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button id="notifBtn" style="position:relative;background:none;border:1px solid var(--bd);border-radius:10px;padding:9px;color:var(--t2)" onclick="goTo('notifs')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span id="notifDot" style="display:none;position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%"></span>
+      </button>
+      <button id="pwaBtn" style="display:none;background:var(--blue4);border:1px solid var(--blue);border-radius:var(--rx);padding:8px 14px;color:var(--blue3);font-size:12px;font-weight:800;gap:6px;align-items:center" onclick="installPWA()">
+        📲 Установить
+      </button>
+    </div>
+  </div>
+  <div class="page on" id="pg-dash">
+    <div class="stats" id="dStats"></div>
+    <div id="dFunnel" style="margin-bottom:20px"></div>
+    <div class="sec-hdr"><div class="sec-ttl">Последние лиды</div><button class="btn btn-gh btn-sm" id="btnAllLeads">Все →</button></div>
+    <div id="dLeads"></div>
+  </div>
+  <div class="page" id="pg-leads">
+    <div class="sec-hdr">
+      <div><div class="sec-ttl">Лиды</div><div class="sec-sub" id="lCnt"></div></div>
+      <button class="btn btn-b btn-sm" id="btnNL" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Новый лид</button>
+    </div>
+    <div class="funnel" id="lFunnel"></div>
+    <div id="lBody"></div>
+  </div>
+  <div class="page" id="pg-apps">
+    <div class="sec-hdr">
+      <div class="sec-ttl">Заявки в банки</div>
+      <button class="btn btn-b btn-sm" id="btnNA" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Новая заявка</button>
+    </div>
+    <div id="aBody"></div>
+  </div>
+  <div class="page" id="pg-deals">
+    <div class="sec-hdr"><div class="sec-ttl">Сделки и комиссии</div></div>
+    <div class="stats" id="deStats"></div>
+    <div id="deBody"></div>
+  </div>
+  <div class="page" id="pg-users">
+    <div class="sec-hdr"><div class="sec-ttl">Пользователи</div></div>
+    <div id="uBody"></div>
+  </div>
+  <div class="page" id="pg-calls">
+    <div class="sec-hdr">
+      <div><div class="sec-ttl">Лог звонков</div><div class="sec-sub" id="cCnt"></div></div>
+      <button class="btn btn-b btn-sm" id="btnNC"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить звонок</button>
+    </div>
+    <div id="cBody"></div>
+  </div>
+  <div class="page" id="pg-notifs">
+    <div class="sec-hdr"><div class="sec-ttl">Уведомления</div><button class="btn btn-gh btn-sm" id="btnClrNotifs">Очистить</button></div>
+    <div id="nBody"></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- MODAL: LEAD -->
+<div class="mw" id="mLead">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle">Новый лид <button class="cx" id="mLeadX">✕</button></div>
+  <div class="fr">
+    <div class="fg full"><label>Имя клиента *</label><input class="inp" id="lNm" placeholder="Асем Нурланова"></div>
+    <div class="fg"><label>Телефон</label><input class="inp" id="lPh" placeholder="+7 777 000 00 00"></div>
+    <div class="fg"><label>Сумма (₸)</label><input class="inp" type="number" id="lAm" placeholder="5000000"></div>
+    <div class="fg"><label>Источник</label>
+      <select class="inp" id="lSr">
+        <option value="platform">Платформа — 30%</option>
+        <option value="external">Внешний — 5%</option>
+      </select>
+    </div>
+    <div class="fg"><label>Город</label><input class="inp" id="lCi" placeholder="Алматы"></div>
+    <div class="fg full" id="lBrWrap" style="display:none"><label>Назначить брокеру</label><select class="inp" id="lBr"><option value="">— авто (round-robin) —</option></select></div>
+    <div class="fg full"><label>Комментарий</label><textarea class="inp" id="lNo" placeholder="Детали..."></textarea></div>
+  </div>
+  <button class="btn-sub" id="btnCrLead">Создать лид</button>
+</div>
+</div>
+
+<!-- MODAL: APP -->
+<div class="mw" id="mApp">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle">Заявка в банк <button class="cx" id="mAppX">✕</button></div>
+  <div class="fr">
+    <div class="fg full"><label>Лид</label><select class="inp" id="aLd"><option value="">— выберите —</option></select></div>
+    <div class="fg"><label>Имя клиента *</label><input class="inp" id="aNm" placeholder="ФИО"></div>
+    <div class="fg"><label>ИИН</label><input class="inp" id="aIi" placeholder="123456789012" maxlength="12"></div>
+    <div class="fg"><label>Телефон</label><input class="inp" id="aPh" placeholder="+7 ..."></div>
+    <div class="fg"><label>Сумма (₸) *</label><input class="inp" type="number" id="aAm"></div>
+    <div class="fg"><label>Срок (мес)</label><input class="inp" id="aTr" placeholder="60"></div>
+    <div class="fg full"><label>Банк *</label><select class="inp" id="aBk"><option value="">— банк —</option></select></div>
+    <div class="fg full"><label>Тип заявки</label>
+      <select class="inp" id="aLt">
+        <option value="credit">Кредит</option>
+        <option value="refinance">Рефинансирование</option>
+        <option value="mortgage">Ипотека</option>
+        <option value="business">Бизнес кредит</option>
+      </select>
+    </div>
+    <div class="fg full"><label>Комментарий к заявке</label><textarea class="inp" id="aNo" placeholder="Дополнительная информация по клиенту..."></textarea></div>
+    <div class="fg full">
+      <label>Файлы / Выписки</label>
+      <div class="uz" id="uzZone"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto 8px;display:block;opacity:.4"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Нажмите чтобы загрузить</div>
+      <input type="file" id="fInp" accept=".pdf,.doc,.docx,.jpg,.png" multiple style="display:none">
+      <div id="fList"></div>
+    </div>
+  </div>
+  <button class="btn-sub" id="btnCrApp">Отправить заявку</button>
+</div>
+</div>
+
+<!-- MODAL: OFFER -->
+<div class="mw" id="mOffer">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle">Ответ банка <button class="cx" id="mOfferX">✕</button></div>
+  <div class="fr">
+    <div class="fg full"><label>Решение банка</label>
+      <select class="inp" id="oDs" onchange="toggleOfferFields()">
+        <option value="approved">Одобрено</option>
+        <option value="rejected">Отказ</option>
+      </select>
+    </div>
+    <div id="oApprFields" class="fg full" style="display:contents">
+      <div class="fg"><label>Тип предложения</label>
+        <select class="inp" id="oTp">
+          <option value="credit">Кредит</option>
+          <option value="refinance">Рефинансирование</option>
+          <option value="mortgage">Ипотека</option>
+          <option value="business">Бизнес кредит</option>
+        </select>
+      </div>
+      <div class="fg"><label>Сумма одобрения (₸)</label><input class="inp" type="number" id="oAm" placeholder="4500000"></div>
+      <div class="fg"><label>Платёж/мес (₸)</label><input class="inp" type="number" id="oPa" placeholder="95000"></div>
+      <div class="fg"><label>Срок (мес)</label><input class="inp" id="oTr" placeholder="60"></div>
+      <div class="fg"><label>Ставка (%)</label><input class="inp" type="number" id="oRa" step="0.1" placeholder="19.5"></div>
+    </div>
+    <div class="fg full"><label>Комментарий банка</label><textarea class="inp" id="oCm" placeholder="Условия, требования, причина отказа..."></textarea></div>
+  </div>
+  <button class="btn-sub" id="btnCrOffer">Отправить ответ</button>
+</div>
+</div>
+
+<!-- MODAL: DEAL -->
+<div class="mw" id="mDeal">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle">Закрыть сделку <button class="cx" id="mDealX">✕</button></div>
+  <div class="fr">
+    <div class="fg full"><label>Комиссия (₸) *</label><input class="inp" type="number" id="dFe" placeholder="150000"></div>
+    <div class="fg"><label>Способ оплаты</label>
+      <select class="inp" id="dMt">
+        <option value="transfer">Перевод</option>
+        <option value="cash">Наличные</option>
+        <option value="card">Карта</option>
+      </select>
+    </div>
+    <div class="fg full">
+      <div class="cp" id="cpBlk">
+        <div style="font-size:11px;font-weight:800;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px">Распределение</div>
+        <div class="cp-g">
+          <div class="cp-i"><div class="cp-l">Платформа</div><div class="cp-v b" id="cpP">—</div></div>
+          <div class="cp-i"><div class="cp-l">Брокер</div><div class="cp-v g" id="cpB">—</div></div>
+          <div class="cp-i"><div class="cp-l">Итого</div><div class="cp-v" id="cpT">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" id="dAppH"><input type="hidden" id="dSrcH"><button class="btn-sub" id="btnCrDeal">Подтвердить сделку</button>
+</div>
+</div>
+
+<!-- PANEL: LEAD -->
+<div class="pw" id="pLead">
+<div class="panel">
+  <div class="ph"><div class="pt" id="pLT">Лид</div><button class="cx" id="pLeadX">✕</button></div>
+  <div class="pb" id="pLB"></div>
+</div>
+</div>
+
+<!-- PANEL: APP -->
+<div class="pw" id="pApp">
+<div class="panel">
+  <div class="ph"><div class="pt" id="pAT">Заявка</div><button class="cx" id="pAppX">✕</button></div>
+  <div class="pb" id="pAB"></div>
+</div>
+</div>
+
+<!-- MODAL: CALL -->
+<div class="mw" id="mCall">
+<div class="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle">Новый звонок <button class="cx" id="mCallX">✕</button></div>
+  <div class="fr">
+    <div class="fg full"><label>Клиент *</label><input class="inp" id="clNm" placeholder="Имя клиента"></div>
+    <div class="fg"><label>Телефон</label><input class="inp" id="clPh" placeholder="+7 777 000 00 00"></div>
+    <div class="fg"><label>Результат</label>
+      <select class="inp" id="clRs">
+        <option value="success">✅ Успешный</option>
+        <option value="no_answer">📵 Не ответил</option>
+        <option value="callback">🔄 Перезвонить</option>
+        <option value="rejected">❌ Отказался</option>
+        <option value="interested">🔥 Заинтересован</option>
+      </select>
+    </div>
+    <div class="fg"><label>Длительность (мин)</label><input class="inp" type="number" id="clDr" placeholder="5"></div>
+    <div class="fg full"><label>Комментарий</label><textarea class="inp" id="clCm" placeholder="О чём говорили..."></textarea></div>
+  </div>
+  <button class="btn-sub" id="btnCrCall">Сохранить звонок</button>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SURL='https://eoainqeboyzwzsoimamp.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVvYWlucWVib3l6d3pzb2ltYW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNDYzNzMsImV4cCI6MjA5MDkyMjM3M30.0eDJKoLFeKUtRxOQIoMTlNWSQVP2oE_U97tTU_cmFCI';
+
+// PWA Install
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredPrompt=e; const b=G('pwaBtn'); if(b){b.style.display='flex';} });
+async function installPWA(){ if(!deferredPrompt) return; deferredPrompt.prompt(); const {outcome}=await deferredPrompt.userChoice; if(outcome==='accepted'){const b=G('pwaBtn');if(b)b.style.display='none';} deferredPrompt=null; }
+window.addEventListener('appinstalled',()=>{ const b=G('pwaBtn'); if(b) b.style.display='none'; });
+
+let db=null, ME=null, PR=null, BANKS=[], FS='all', PF=[], CURR_APP_ID=null;
+
+const G = id => document.getElementById(id);
+const fN = n => n ? new Intl.NumberFormat('ru-KZ').format(n)+' ₸' : '—';
+const fD = d => d ? new Date(d).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+const ini = n => n ? n.trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase() : '?';
+
+const ST = {
+  new:      {l:'Новый',     c:'b-new'},
+  taken:    {l:'Взят',      c:'b-taken'},
+  sent:     {l:'Отправлен', c:'b-sent'},
+  offered:  {l:'Офер',      c:'b-offered'},
+  closed:   {l:'Закрыт',   c:'b-closed'},
+  rejected: {l:'Отказ',    c:'b-rejected'},
+  in_progress:{l:'В работе',c:'b-in_progress'},
+  approved: {l:'Одобрено',  c:'b-approved'},
+};
+
+// ── UTILS ─────────────────────────────────────────────────────────────
+function toast(m, t='ok') {
+  const e=G('toast'); e.textContent=m; e.className='toast '+t+' show';
+  setTimeout(()=>e.classList.remove('show'), 3000);
+}
+function openM(id) { G(id).classList.add('show'); document.body.style.overflow='hidden'; }
+function closeM(id) { G(id).classList.remove('show'); document.body.style.overflow=''; }
+function openP(id) { G(id).classList.add('show'); document.body.style.overflow='hidden'; }
+function closeP(id) { G(id).classList.remove('show'); document.body.style.overflow=''; }
+
+function el(tag, cls, txt) {
+  const e=document.createElement(tag);
+  if(cls) e.className=cls;
+  if(txt) e.textContent=txt;
+  return e;
+}
+
+// ── EVENT LISTENERS (STATIC) ──────────────────────────────────────────
+G('lBtn').addEventListener('click', login);
+G('pw').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+G('btnOut').addEventListener('click', logout);
+G('menuBtn').addEventListener('click', ()=>{ G('sb').classList.toggle('open'); G('ov').classList.toggle('open'); });
+G('ov').addEventListener('click', ()=>{ G('sb').classList.remove('open'); G('ov').classList.remove('open'); });
+G('mLeadX').addEventListener('click', ()=>closeM('mLead'));
+G('mAppX').addEventListener('click', ()=>closeM('mApp'));
+G('mOfferX').addEventListener('click', ()=>closeM('mOffer'));
+G('mDealX').addEventListener('click', ()=>closeM('mDeal'));
+G('pLeadX').addEventListener('click', ()=>closeP('pLead'));
+G('pAppX').addEventListener('click', ()=>closeP('pApp'));
+G('btnCrLead').addEventListener('click', createLead);
+G('btnCrApp').addEventListener('click', createApp);
+G('btnCrOffer').addEventListener('click', submitOffer);
+G('btnCrDeal').addEventListener('click', closeDeal);
+G('btnAllLeads').addEventListener('click', ()=>goTo('leads'));
+G('btnNL').addEventListener('click', ()=>openM('mLead'));
+G('btnNA').addEventListener('click', ()=>openM('mApp'));
+G('btnNC').addEventListener('click', ()=>openM('mCall'));
+G('mCallX').addEventListener('click', ()=>closeM('mCall'));
+G('btnCrCall').addEventListener('click', createCall);
+G('btnClrNotifs').addEventListener('click', ()=>{ NOTIFS=[]; localStorage.removeItem('brokeros_notifs'); clearNotifDot(); renderNotifs(); });
+G('uzZone').addEventListener('click', ()=>G('fInp').click());
+G('fInp').addEventListener('change', e=>handleFiles(e.target.files));
+G('dFe').addEventListener('input', prevComm);
+
+// ── AUTH ──────────────────────────────────────────────────────────────
+async function login() {
+  if(!db) { G('lgErr').textContent='Ошибка подключения'; G('lgErr').style.display='block'; return; }
+  const email=G('em').value.trim(), pass=G('pw').value;
+  const btn=G('lBtn');
+  if(!email||!pass) { G('lgErr').textContent='Введите email и пароль'; G('lgErr').style.display='block'; return; }
+  btn.textContent='Входим...'; btn.disabled=true; G('lgErr').style.display='none';
+  const {data, error} = await db.auth.signInWithPassword({email, password:pass});
+  if(error) {
+    G('lgErr').textContent='Неверный email или пароль'; G('lgErr').style.display='block';
+    btn.textContent='Войти в BrokerOS'; btn.disabled=false; return;
+  }
+  await loadUser(data.user);
+}
+
+async function logout() {
+  await db.auth.signOut();
+  G('app').style.display='none'; G('login').classList.add('show');
+  G('pw').value=''; G('lBtn').textContent='Войти в BrokerOS'; G('lBtn').disabled=false;
+  ME=null; PR=null;
+}
+
+async function loadUser(user) {
+  ME=user;
+  const {data:p} = await db.from('profiles').select('*').eq('id',user.id).single();
+  if(!p) { toast('Профиль не найден','err'); await db.auth.signOut(); return; }
+  PR=p;
+  G('login').classList.remove('show'); G('app').style.display='block';
+  const avc = p.role==='admin' ? 'av-admin' : p.role==='broker' ? 'av-broker' : 'av-bank';
+  G('sbAv').className='ava '+avc; G('sbAv').textContent=ini(p.full_name);
+  G('sbNm').textContent=p.full_name||user.email;
+  G('sbRl').textContent=p.role==='admin'?'Администратор':p.role==='broker'?'Брокер':'Менеджер банка';
+  if(p.role==='admin'||p.role==='broker') { G('btnNL').style.display='flex'; G('btnNA').style.display='flex'; }
+  // Если админ — загружаем брокеров в селект назначения
+  if(p.role==='admin') {
+    G('lBrWrap').style.display='block';
+    const {data:brokers}=await db.from('profiles').select('id,full_name').eq('role','broker');
+    const sel=G('lBr');
+    (brokers||[]).forEach(b=>{ const o=document.createElement('option'); o.value=b.id; o.textContent=b.full_name||b.id; sel.appendChild(o); });
+  }
+  buildNav();
+  const {data:bks} = await db.from('banks').select('*').order('name');
+  BANKS=bks||[];
+  BANKS.forEach(b=>{ const o=document.createElement('option'); o.value=b.id; o.textContent=b.name; G('aBk').appendChild(o); });
+  await goTo('dash');
+  setupRT();
+  // Запрашиваем разрешение на push уведомления
+  setTimeout(requestPushPermission, 3000);
+  // Показываем точку если есть непрочитанные
+  if(NOTIFS.some(n=>!n.read)) showNotifDot();
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────
+const ICONS = {
+  grid: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+  usr:  '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
+  file: '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+  coin: '<circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/>',
+  team: '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><circle cx="20" cy="7" r="3"/><path d="M23 21v-2a3 3 0 00-2-2.83"/>',
+  phone:'<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/>',
+  bell: '<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
+};
+
+function navIcon(k) {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+ICONS[k]+'</svg>';
+}
+
+function buildNav() {
+  const r=PR.role, nav=G('sbNav');
+  nav.innerHTML='';
+  const items = [
+    {id:'dash',   ico:'grid',  lbl:'Дашборд'},
+    ...(r!=='bank'?[{id:'leads', ico:'usr',   lbl:'Лиды'}]:[]),
+    {id:'apps',   ico:'file',  lbl:r==='bank'?'Входящие заявки':'Заявки'},
+    ...(r!=='bank'?[{id:'deals', ico:'coin',  lbl:'Комиссии'}]:[]),
+    ...(r!=='bank'?[{id:'calls', ico:'phone', lbl:'Звонки'}]:[]),
+    {id:'notifs', ico:'bell',  lbl:'Уведомления'},
+    ...(r==='admin'?[{id:'users', ico:'team',  lbl:'Пользователи'}]:[]),
+  ];
+  const sec = document.createElement('div'); sec.className='nav-sec'; sec.textContent='Меню';
+  nav.appendChild(sec);
+  items.forEach(item=>{
+    const d = document.createElement('div');
+    d.className='nav-i'; d.id='n-'+item.id;
+    d.innerHTML=navIcon(item.ico)+item.lbl;
+    d.addEventListener('click', ()=>goTo(item.id));
+    nav.appendChild(d);
+  });
+}
+
+async function goTo(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav-i').forEach(n=>n.classList.remove('on'));
+  const pg=G('pg-'+page); if(pg) pg.classList.add('on');
+  const nv=G('n-'+page); if(nv) nv.classList.add('on');
+  const T={dash:'Дашборд',leads:'Лиды',apps:'Заявки',deals:'Комиссии',users:'Пользователи',calls:'Звонки',notifs:'Уведомления'};
+  G('tbT').textContent=T[page]||page;
+  G('sb').classList.remove('open'); G('ov').classList.remove('open');
+  if(page==='dash')   await renderDash();
+  if(page==='leads')  await renderLeads();
+  if(page==='apps')   await renderApps();
+  if(page==='deals')  await renderDeals();
+  if(page==='users')  await renderUsers();
+  if(page==='calls')  await renderCalls();
+  if(page==='notifs') { renderNotifs(); clearNotifDot(); }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────
+async function renderDash() {
+  const r=PR.role;
+  let lq=db.from('leads').select('*',{count:'exact',head:true});
+  let aq=db.from('applications').select('*',{count:'exact',head:true});
+  if(r==='broker') { lq=lq.eq('assigned_broker',ME.id); aq=aq.eq('broker_id',ME.id); }
+  if(r==='bank') aq=aq.eq('bank_id',PR.bank_id);
+  const [{count:lc},{count:ac}] = await Promise.all([lq,aq]);
+  let dq = db.from('deals').select('broker_fee,partner_fee,service_fee');
+  if(r==='broker') {
+    const {data:ma} = await db.from('applications').select('id').eq('broker_id',ME.id);
+    const ids=(ma||[]).map(a=>a.id);
+    if(ids.length) dq=dq.in('application_id',ids);
+    else { G('dStats').innerHTML=statCard('s-b','0','Лидов')+statCard('s-y','0','Заявок')+statCard('s-g','0','Сделок')+statCard('s-p','—','Комиссия'); return; }
+  }
+  const {data:dls}=await dq;
+  const totB=(dls||[]).reduce((s,d)=>s+(d.broker_fee||0),0);
+  const totP=(dls||[]).reduce((s,d)=>s+(d.partner_fee||0),0);
+  G('dStats').innerHTML=
+    statCard('s-b',lc||0,'Лидов')+
+    statCard('s-y',ac||0,'Заявок')+
+    statCard('s-g',(dls||[]).length,'Сделок')+
+    statCard('s-p',fN(r==='broker'?totB:totP),r==='broker'?'Моя комиссия':'Доход','small');
+  // Funnel
+  const sts=Object.keys(ST);
+  const fw=document.createElement('div'); fw.style.cssText='background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin-bottom:20px';
+  const ftitle=document.createElement('div'); ftitle.className='sec-ttl'; ftitle.style.marginBottom='14px'; ftitle.textContent='Воронка';
+  const frow=document.createElement('div'); frow.style.cssText='display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none';
+  fw.appendChild(ftitle); fw.appendChild(frow);
+  G('dFunnel').innerHTML=''; G('dFunnel').appendChild(fw);
+  await Promise.all(sts.map(async s=>{
+    let q=db.from('leads').select('*',{count:'exact',head:true}).eq('status',s);
+    if(r==='broker') q=q.eq('assigned_broker',ME.id);
+    const {count}=await q;
+    const d=document.createElement('div');
+    d.style.cssText='flex-shrink:0;min-width:80px;background:var(--bg3);border-radius:var(--rs);padding:12px;text-align:center;border:1px solid var(--bd)';
+    d.innerHTML='<div style="font-size:22px;font-weight:900;color:var(--blue3)">'+(count||0)+'</div><div style="font-size:10px;color:var(--t2);margin-top:4px;font-weight:700">'+ST[s].l+'</div>';
+    frow.appendChild(d);
+  }));
+  let lq2=db.from('leads').select('*').order('created_at',{ascending:false}).limit(5);
+  if(r==='broker') lq2=lq2.eq('assigned_broker',ME.id);
+  const {data:leads}=await lq2;
+  G('dLeads').innerHTML=''; renderLeadCards(leads||[], G('dLeads'), false);
+}
+
+function statCard(cls, val, lbl, size) {
+  const sv=size==='small'?'font-size:14px;margin-top:6px':'';
+  return '<div class="stat '+cls+'"><div class="sg"></div><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div><div class="sv" style="'+sv+'">'+val+'</div><div class="sl">'+lbl+'</div></div>';
+}
+
+// ── LEADS ─────────────────────────────────────────────────────────────
+async function renderLeads() {
+  FS='all';
+  const sts=['all',...Object.keys(ST)];
+  const fun=G('lFunnel'); fun.innerHTML='';
+  sts.forEach((s,i)=>{
+    const c=document.createElement('div');
+    c.className='fchip'+(i===0?' on':'');
+    c.textContent=s==='all'?'Все':ST[s].l;
+    c.addEventListener('click', ()=>{ document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('on')); c.classList.add('on'); FS=s; loadLeads(); });
+    fun.appendChild(c);
+  });
+  await loadLeads();
+}
+
+async function loadLeads() {
+  let q=db.from('leads').select('*').order('created_at',{ascending:false});
+  if(FS!=='all') q=q.eq('status',FS);
+  if(PR.role==='broker') q=q.eq('assigned_broker',ME.id);
+  const {data:leads}=await q;
+  G('lCnt').textContent=(leads||[]).length+' лидов';
+  G('lBody').innerHTML=''; renderLeadCards(leads||[], G('lBody'), true);
+}
+
+function renderLeadCards(leads, container, withActions) {
+  if(!leads.length) { container.innerHTML='<div class="empty"><div class="empty-i">📋</div><div class="empty-t">Лидов нет</div><div class="empty-s">Создайте первый лид</div></div>'; return; }
+  leads.forEach(l=>{
+    const st=ST[l.status]||ST.new;
+    const card=document.createElement('div');
+    card.className='lc s-'+(l.status||'new');
+    // Top row
+    const top=document.createElement('div'); top.className='lc-top';
+    const nameDiv=document.createElement('div');
+    const nm=document.createElement('div'); nm.className='lc-nm'; nm.textContent=l.client_name||'—';
+    const dt=document.createElement('div'); dt.className='lc-dt'; dt.textContent=fD(l.created_at)+(l.city?' · '+l.city:'');
+    nameDiv.appendChild(nm); nameDiv.appendChild(dt);
+    const amt=document.createElement('div'); amt.className='lc-amt'; amt.textContent=fN(l.amount);
+    top.appendChild(nameDiv); top.appendChild(amt);
+    // Meta
+    const meta=document.createElement('div'); meta.className='lc-meta';
+    const b1=document.createElement('span'); b1.className='badge '+st.c; b1.textContent=st.l;
+    const b2=document.createElement('span'); b2.className='badge '+(l.source==='platform'?'b-platform':'b-external'); b2.textContent=l.source==='platform'?'Платформа 30%':'Внешний 5%';
+    meta.appendChild(b1); meta.appendChild(b2);
+    card.appendChild(top); card.appendChild(meta);
+    card.addEventListener('click', ()=>openLead(l.id));
+    // Actions
+    if(withActions && PR.role==='broker' && (l.status==='new'||l.status==='taken')) {
+      const act=document.createElement('div'); act.className='lc-act';
+      act.addEventListener('click', e=>e.stopPropagation());
+      if(l.status==='new') {
+        const tb=document.createElement('button'); tb.className='btn btn-b btn-sm'; tb.textContent='Взять в работу';
+        tb.addEventListener('click', ()=>takeLead(l.id)); act.appendChild(tb);
+      }
+      const pb=document.createElement('button'); pb.className='btn btn-gh btn-sm'; pb.textContent='В банк →';
+      pb.addEventListener('click', ()=>prepApp(l.id, l.client_name||'', l.amount||0));
+      act.appendChild(pb); card.appendChild(act);
+    }
+    container.appendChild(card);
+  });
+}
+
+async function takeLead(id) {
+  await db.from('leads').update({status:'taken',assigned_broker:ME.id}).eq('id',id);
+  toast('✓ Лид взят в работу'); await loadLeads();
+}
+
+function prepApp(leadId, name, amount) {
+  G('aLd').innerHTML=''; const o=document.createElement('option'); o.value=leadId; o.textContent=name; G('aLd').appendChild(o);
+  G('aNm').value=name; G('aAm').value=amount||''; openM('mApp');
+}
+
+// ── LEAD DETAIL ───────────────────────────────────────────────────────
+async function openLead(id) {
+  const {data:l}=await db.from('leads').select('*').eq('id',id).single();
+  if(!l) return;
+  G('pLT').textContent=l.client_name||'Лид';
+  const ce=PR.role==='admin'||PR.role==='broker';
+  const pb=G('pLB'); pb.innerHTML='';
+  // Status buttons
+  if(ce) {
+    const sr=document.createElement('div'); sr.className='st-row';
+    Object.entries(ST).forEach(([k,v])=>{
+      const b=document.createElement('button'); b.className='stb'+(l.status===k?' on':''); b.textContent=v.l;
+      b.addEventListener('click', ()=>{ document.querySelectorAll('.stb').forEach(x=>x.classList.remove('on')); b.classList.add('on'); updLeadSt(id,k); });
+      sr.appendChild(b);
+    });
+    pb.appendChild(sr);
+  }
+  // Detail grid
+  const dig=document.createElement('div'); dig.className='dig';
+  const addDI=(lbl,val,full)=>{
+    const d=document.createElement('div'); d.className='di'+(full?' full':'');
+    d.innerHTML='<div class="di-l">'+lbl+'</div><div class="di-v">'+val+'</div>';
+    dig.appendChild(d);
+  };
+  addDI('Клиент',l.client_name||'—');
+  addDI('Сумма','<span style="font-size:16px;color:var(--blue3);font-weight:900">'+fN(l.amount)+'</span>');
+  addDI('Источник',l.source==='platform'?'🏢 Платформа (30%)':'🔗 Внешний (5%)');
+  addDI('Дата',fD(l.created_at));
+  if(l.phone) { const wa='<a class="wa" href="https://wa.me/'+l.phone.replace(/\D/g,'')+'" target="_blank">WA</a>'; addDI('Телефон',l.phone+' '+wa,true); }
+  if(l.city)  addDI('Город',l.city);
+  if(l.note)  addDI('Комментарий','<span style="font-weight:500;color:var(--t2)">'+l.note+'</span>',true);
+  pb.appendChild(dig);
+  if(ce) {
+    const btn=document.createElement('button'); btn.className='btn btn-b'; btn.style.cssText='width:100%;justify-content:center'; btn.textContent='Отправить в банк →';
+    btn.addEventListener('click', ()=>{ prepApp(l.id, l.client_name||'', l.amount||0); closeP('pLead'); });
+    pb.appendChild(btn);
+  }
+  // История изменений
+  await renderLeadHistory(l.id, pb);
+  openP('pLead');
+}
+
+async function updLeadSt(id, status) {
+  await db.from('leads').update({status}).eq('id',id);
+  const stLabels={new:'Новый',taken:'Взят в работу',sent:'Отправлен в банк',offered:'Получен офер',closed:'Закрыт',rejected:'Отказ',in_progress:'В работе'};
+  await addLeadHistory(id, 'Статус изменён: '+( stLabels[status]||status));
+  addNotif('📊 Лид: статус изменён на "'+( stLabels[status]||status)+'"','info');
+  if(G('pg-leads').classList.contains('on')) await loadLeads();
+}
+
+// ── CREATE LEAD ───────────────────────────────────────────────────────
+async function createLead() {
+  const name=G('lNm').value.trim();
+  if(!name) { toast('Введите имя','err'); return; }
+  // Определяем брокера
+  let brokerId=PR.role==='broker'?ME.id:null;
+  let assignedBroker=null;
+  const manualBroker=G('lBr')?.value;
+  if(PR.role==='admin') {
+    if(manualBroker) {
+      brokerId=manualBroker;
+    } else {
+      // Round-robin — берём брокера с наименьшей нагрузкой
+      assignedBroker=await getNextBroker();
+      if(assignedBroker) brokerId=assignedBroker.id;
+    }
+  }
+  const {data:newLead, error}=await db.from('leads').insert({
+    client_name:name, phone:G('lPh').value.trim(), amount:G('lAm').value||null,
+    source:G('lSr').value, city:G('lCi').value.trim(), note:G('lNo').value.trim(),
+    status:brokerId?'taken':'new', assigned_broker:brokerId
+  }).select().single();
+  if(error) { toast('Ошибка: '+error.message,'err'); return; }
+  // История
+  await addLeadHistory(newLead.id, 'Лид создан');
+  // Уведомление и WhatsApp если назначен брокер
+  if(brokerId) {
+    const broker=assignedBroker||(await db.from('profiles').select('full_name,whatsapp').eq('id',brokerId).single()).data;
+    if(broker) {
+      await addLeadHistory(newLead.id, 'Назначен брокеру: '+broker.full_name);
+      await assignLeadToBroker(newLead.id, brokerId, broker.full_name, broker.whatsapp, name, G('lAm').value||0);
+    }
+  }
+  toast('✓ Лид создан'); closeM('mLead');
+  ['lNm','lPh','lAm','lCi','lNo'].forEach(id=>G(id).value='');
+  if(G('pg-leads').classList.contains('on')) await loadLeads();
+  if(G('pg-dash').classList.contains('on')) await renderDash();
+}
+
+// ── APPS ──────────────────────────────────────────────────────────────
+async function renderApps() {
+  const r=PR.role;
+  let q=db.from('applications').select('*,banks(name)').order('created_at',{ascending:false});
+  if(r==='broker') q=q.eq('broker_id',ME.id);
+  if(r==='bank')   q=q.eq('bank_id',PR.bank_id);
+  const {data:apps}=await q;
+  const ab=G('aBody'); ab.innerHTML='';
+  if(!apps||!apps.length) { ab.innerHTML='<div class="empty"><div class="empty-i">📄</div><div class="empty-t">Заявок нет</div></div>'; return; }
+  apps.forEach(a=>{
+    const st=ST[a.status]||{l:a.status,c:'b-in_progress'};
+    const card=document.createElement('div'); card.className='lc s-'+(a.status||'in_progress');
+    const top=document.createElement('div'); top.className='lc-top';
+    const nd=document.createElement('div');
+    const nm=document.createElement('div'); nm.className='lc-nm'; nm.textContent=a.client_name||'—';
+    const dt=document.createElement('div'); dt.className='lc-dt'; dt.textContent='🏦 '+(a.banks?.name||'—')+' · '+fD(a.created_at);
+    nd.appendChild(nm); nd.appendChild(dt);
+    const am=document.createElement('div'); am.className='lc-amt'; am.textContent=fN(a.amount);
+    top.appendChild(nd); top.appendChild(am);
+    const meta=document.createElement('div'); meta.className='lc-meta';
+    const b=document.createElement('span'); b.className='badge '+st.c; b.textContent=st.l;
+    meta.appendChild(b);
+    card.appendChild(top); card.appendChild(meta);
+    card.addEventListener('click', ()=>openApp(a.id));
+    ab.appendChild(card);
+  });
+}
+
+async function openApp(id) {
+  const {data:a}=await db.from('applications').select('*,banks(name),leads(client_name,source,amount)').eq('id',id).single();
+  if(!a) return;
+  const {data:offers}=await db.from('offers').select('*').eq('application_id',id);
+  const {data:files}=await db.from('files').select('*').eq('application_id',id);
+  const r=PR.role;
+  G('pAT').textContent=a.client_name||'Заявка';
+  const pb=G('pAB'); pb.innerHTML='';
+  CURR_APP_ID=id;
+  // Detail grid
+  const dig=document.createElement('div'); dig.className='dig';
+  const addDI=(lbl,val,full)=>{ const d=document.createElement('div'); d.className='di'+(full?' full':''); d.innerHTML='<div class="di-l">'+lbl+'</div><div class="di-v">'+val+'</div>'; dig.appendChild(d); };
+  addDI('Клиент',a.client_name||'—');
+  addDI('Сумма','<span style="font-size:16px;color:var(--blue3);font-weight:900">'+fN(a.amount)+'</span>');
+  addDI('Банк','🏦 '+(a.banks?.name||'—'));
+  addDI('Срок',(a.term||'—')+' мес');
+  if(a.iin) addDI('ИИН','<span style="font-family:monospace">'+a.iin+'</span>');
+  if(a.phone) addDI('Телефон',a.phone);
+  if(a.loan_type) { const lt={credit:'Кредит',refinance:'Рефинансирование',mortgage:'Ипотека',business:'Бизнес кредит'}; addDI('Тип',lt[a.loan_type]||a.loan_type); }
+  addDI('Статус','<span class="badge '+(ST[a.status]?.c||'b-in_progress')+'">'+(ST[a.status]?.l||a.status)+'</span>');
+  if(a.note) addDI('Комментарий','<span style="font-weight:500;color:var(--t2)">'+a.note+'</span>',true);
+  // WhatsApp кнопка менеджера банка
+  const bankInfo=BANKS.find(b=>b.id===a.bank_id);
+  if(bankInfo?.whatsapp && r==='broker') {
+    const waDiv=document.createElement('div'); waDiv.style.marginBottom='16px';
+    const waBtn=document.createElement('a');
+    waBtn.className='wa'; waBtn.target='_blank';
+    waBtn.href='https://wa.me/'+bankInfo.whatsapp.replace(/\D/g,'');
+    waBtn.style.cssText='display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:var(--rs);background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);color:#25d366;font-size:14px;font-weight:800';
+    waBtn.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Написать менеджеру '+bankInfo.name;
+    waDiv.appendChild(waBtn);
+    pb.appendChild(waDiv);
+  }
+  pb.appendChild(dig);
+  // Files
+  if(files&&files.length) {
+    const ft=document.createElement('div'); ft.style.marginBottom='16px';
+    ft.innerHTML='<div style="font-size:11px;font-weight:800;color:var(--t2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px">Файлы</div>';
+    files.forEach(f=>{ const fi=document.createElement('div'); fi.className='fi-item'; fi.innerHTML='📎 <a href="'+f.url+'" target="_blank">'+( f.type||'Файл')+'</a>'; ft.appendChild(fi); });
+    pb.appendChild(ft);
+  }
+  // Offers
+  const otitle=document.createElement('div'); otitle.style.cssText='font-size:14px;font-weight:900;margin-bottom:12px'; otitle.textContent='Предложения банков';
+  pb.appendChild(otitle);
+  if(offers&&offers.length) {
+    offers.forEach(o=>{
+      const oc=document.createElement('div');
+      oc.className='oc'+(o.is_selected?' sel':'')+(o.is_rejected?' rej':'');
+      const ot=document.createElement('div'); ot.className='ot';
+      const offerTypeLabels={credit:'Кредит',refinance:'Рефинансирование',mortgage:'Ипотека',business:'Бизнес кредит'};
+      if(o.is_rejected) {
+        oc.style.cssText='background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.25);border-radius:var(--rs);padding:16px;margin-bottom:10px';
+        oc.innerHTML='<div style="color:var(--red);font-weight:900;font-size:15px;margin-bottom:8px">❌ Отказ</div>'+
+          (o.comment?'<div style="font-size:13px;color:var(--t2);font-weight:600">💬 '+o.comment+'</div>':'');
+        pb.appendChild(oc);
+        return;
+      }
+      const ob=document.createElement('div'); ob.className='ob';
+      ob.textContent=(o.is_selected?'✓ Выбрано • ':'')+fN(o.approved_amount);
+      if(o.offer_type) {
+        const tp=document.createElement('span');
+        tp.style.cssText='font-size:11px;color:var(--blue3);font-weight:700;margin-left:8px;background:var(--blue4);padding:3px 8px;border-radius:8px';
+        tp.textContent=offerTypeLabels[o.offer_type]||o.offer_type;
+        ob.appendChild(tp);
+      }
+      ot.appendChild(ob);
+      if(r==='broker'&&!o.is_selected) {
+        const sb=document.createElement('button'); sb.className='btn btn-gn btn-sm'; sb.textContent='Выбрать';
+        sb.addEventListener('click', ()=>selOffer(o.id, id, a.leads?.source||'external', a.amount||0));
+        ot.appendChild(sb);
+      }
+      const os=document.createElement('div'); os.className='os';
+      [['Платёж/мес',fN(o.monthly_payment)],['Срок',(o.term||'—')+' мес'],['Ставка',(o.interest||'—')+'%']].forEach(([l2,v2])=>{
+        os.innerHTML+='<div class="oi"><div class="oi-l">'+l2+'</div><div class="oi-v">'+v2+'</div></div>';
+      });
+      oc.appendChild(ot); oc.appendChild(os);
+      if(o.comment) {
+        const cm=document.createElement('div');
+        cm.style.cssText='margin-top:10px;font-size:13px;color:var(--t2);font-weight:600;padding-top:10px;border-top:1px solid var(--bd)';
+        cm.textContent='💬 '+o.comment;
+        oc.appendChild(cm);
+      }
+      pb.appendChild(oc);
+    });
+  } else {
+    const em=document.createElement('div'); em.style.cssText='text-align:center;padding:24px;color:var(--t3);font-size:14px'; em.textContent='Предложений нет';
+    pb.appendChild(em);
+  }
+  if(r==='bank') {
+    const btn=document.createElement('button'); btn.className='btn btn-b'; btn.style.cssText='width:100%;justify-content:center;margin-top:14px'; btn.textContent='+ Добавить предложение';
+    btn.addEventListener('click', ()=>{ openM('mOffer'); closeP('pApp'); });
+    pb.appendChild(btn);
+  }
+  openP('pApp');
+}
+
+async function createApp() {
+  const name=G('aNm').value.trim(), bankId=G('aBk').value, amount=G('aAm').value;
+  if(!name||!bankId||!amount) { toast('Заполните обязательные поля','err'); return; }
+  const loanType=G('aLt')?.value||'credit';
+  const {data:nd,error}=await db.from('applications').insert({
+    lead_id:G('aLd').value||null, client_name:name, iin:G('aIi').value.trim(),
+    phone:G('aPh').value.trim(), amount:amount||null, term:G('aTr').value,
+    bank_id:bankId, broker_id:ME.id, note:G('aNo').value.trim(),
+    loan_type:loanType, status:'in_progress'
+  }).select().single();
+  if(error) { toast('Ошибка: '+error.message,'err'); return; }
+  if(G('aLd').value) await db.from('leads').update({status:'sent'}).eq('id',G('aLd').value);
+  // WhatsApp уведомление менеджеру банка
+  const bank=BANKS.find(b=>b.id===bankId);
+  if(bank?.whatsapp) {
+    const loanLabels={credit:'Кредит',refinance:'Рефинансирование',mortgage:'Ипотека',business:'Бизнес кредит'};
+    const brokerName=PR.full_name||ME.email;
+    const waText=encodeURIComponent(
+      '🏦 *Новая заявка BrokerOS*\n\n'+
+      '👤 Клиент: '+name+'\n'+
+      '💰 Сумма: '+new Intl.NumberFormat('ru-KZ').format(amount)+' ₸\n'+
+      '📋 Тип: '+( loanLabels[loanType]||loanType)+'\n'+
+      (G('aTr').value?'⏱ Срок: '+G('aTr').value+' мес\n':'')+
+      (G('aIi').value?'🪪 ИИН: '+G('aIi').value+'\n':'')+
+      (G('aPh').value?'📱 Телефон: '+G('aPh').value+'\n':'')+
+      (G('aNo').value?'💬 Комментарий: '+G('aNo').value+'\n':'')+
+      '\n📲 От брокера: '+brokerName
+    );
+    const waUrl='https://wa.me/'+bank.whatsapp.replace(/\D/g,'')+`?text=${waText}`;
+    // Открываем WhatsApp в новой вкладке
+    window.open(waUrl,'_blank');
+    toast('✓ Заявка отправлена — откройте WhatsApp','ok');
+  } else {
+    toast('✓ Заявка отправлена','ok');
+  }
+  if(PF.length&&nd) {
+    for(const file of PF) {
+      const path='apps/'+nd.id+'/'+file.name;
+      const {data:up}=await db.storage.from('files').upload(path,file,{upsert:true});
+      if(up) {
+        const {data:{publicUrl}}=db.storage.from('files').getPublicUrl(path);
+        await db.from('files').insert({application_id:nd.id,type:file.name,url:publicUrl});
+      }
+    }
+    PF=[]; G('fList').innerHTML='';
+  }
+  closeM('mApp'); await renderApps();
+}
+
+// ── OFFER ─────────────────────────────────────────────────────────────
+function toggleOfferFields() {
+  const dec=G('oDs').value;
+  const fields=G('oApprFields');
+  if(fields) fields.style.display=dec==='rejected'?'none':'contents';
+}
+
+async function submitOffer() {
+  const appId=CURR_APP_ID||G('ofAppId')?.value;
+  const decision=G('oDs')?.value||'approved';
+  const comment=G('oCm')?.value||'';
+  if(!appId) { toast('Ошибка: нет заявки','err'); return; }
+  const isRejected=decision==='rejected';
+  if(!isRejected && !G('oAm').value) { toast('Укажите сумму одобрения','err'); return; }
+  const {error}=await db.from('offers').insert({
+    application_id:appId,
+    approved_amount:isRejected?null:G('oAm').value,
+    monthly_payment:isRejected?null:(G('oPa').value||null),
+    term:isRejected?null:G('oTr').value,
+    interest:isRejected?null:(G('oRa').value||null),
+    offer_type:isRejected?null:(G('oTp')?.value||'credit'),
+    is_selected:false,
+    is_rejected:isRejected,
+    comment:comment
+  });
+  if(error) { toast('Ошибка: '+error.message,'err'); return; }
+  const newStatus=isRejected?'rejected':'offered';
+  await db.from('applications').update({status:newStatus}).eq('id',appId);
+  toast(isRejected?'❌ Отказ отправлен':'✓ Предложение отправлено'); closeM('mOffer'); await renderApps();
+}
+
+async function selOffer(offId, appId, src, amount) {
+  await db.from('offers').update({is_selected:true}).eq('id',offId);
+  G('dFe').value=Math.round(amount*0.03);
+  G('dSrcH').value=src; G('dAppH').value=appId;
+  prevComm(); closeP('pApp'); openM('mDeal');
+}
+
+// ── DEAL ──────────────────────────────────────────────────────────────
+function prevComm() {
+  const fee=parseFloat(G('dFe').value)||0, src=G('dSrcH')?.value||'external';
+  if(!fee) { G('cpBlk').style.display='none'; return; }
+  const pp=src==='platform'?0.30:0.05;
+  G('cpP').textContent=fN(Math.round(fee*pp));
+  G('cpB').textContent=fN(Math.round(fee*(1-pp)));
+  G('cpT').textContent=fN(fee);
+  G('cpBlk').style.display='block';
+}
+
+async function closeDeal() {
+  const appId=G('dAppH')?.value, src=G('dSrcH')?.value||'external';
+  const fee=parseFloat(G('dFe').value);
+  if(!fee||!appId) { toast('Заполните данные','err'); return; }
+  const pp=src==='platform'?0.30:0.05;
+  const {error}=await db.from('deals').insert({
+    application_id:appId, service_fee:fee,
+    partner_fee:Math.round(fee*pp), broker_fee:Math.round(fee*(1-pp)),
+    commission_type:src, payment_method:G('dMt').value
+  });
+  if(error) { toast('Ошибка: '+error.message,'err'); return; }
+  await db.from('applications').update({status:'closed'}).eq('id',appId);
+  const {data:ap}=await db.from('applications').select('lead_id').eq('id',appId).single();
+  if(ap?.lead_id) await db.from('leads').update({status:'closed'}).eq('id',ap.lead_id);
+  toast('🎉 Сделка закрыта!','ok'); closeM('mDeal'); await renderApps();
+}
+
+// ── DEALS ─────────────────────────────────────────────────────────────
+async function renderDeals() {
+  const r=PR.role;
+  let q=db.from('deals').select('*,applications(client_name,amount,leads(source))').order('created_at',{ascending:false});
+  if(r==='broker') {
+    const {data:ma}=await db.from('applications').select('id').eq('broker_id',ME.id);
+    const ids=(ma||[]).map(a=>a.id);
+    if(ids.length) q=q.in('application_id',ids);
+    else { G('deBody').innerHTML='<div class="empty"><div class="empty-i">💰</div><div class="empty-t">Сделок нет</div></div>'; return; }
+  }
+  const {data:dls}=await q;
+  if(!dls||!dls.length) { G('deBody').innerHTML='<div class="empty"><div class="empty-i">💰</div><div class="empty-t">Сделок нет</div></div>'; return; }
+  const tP=dls.reduce((s,d)=>s+(d.partner_fee||0),0);
+  const tB=dls.reduce((s,d)=>s+(d.broker_fee||0),0);
+  G('deStats').innerHTML=
+    '<div class="stat s-g"><div class="sg"></div><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8"/></svg></div><div class="sv" style="font-size:14px;margin-top:6px">'+fN(r==='broker'?tB:tP)+'</div><div class="sl">'+(r==='broker'?'Моя комиссия':'Доход платформы')+'</div></div>'+
+    '<div class="stat s-b"><div class="sg"></div><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div class="sv">'+dls.length+'</div><div class="sl">Сделок</div></div>';
+  G('deBody').innerHTML='';
+  dls.forEach(d=>{
+    const dc=document.createElement('div'); dc.className='dc';
+    dc.innerHTML='<div class="dc-t"><div><div class="dc-nm">'+(d.applications?.client_name||'—')+'</div><div class="dc-sr">'+(d.commission_type==='platform'?'🏢 Платформа — 30%':'🔗 Внешний — 5%')+'</div></div><div class="lc-amt">'+fN(d.service_fee)+'</div></div>'+
+      '<div class="cs-wrap"><div class="cs-i"><div class="cs-l">Платформа</div><div class="cs-v b">'+fN(d.partner_fee)+'</div></div><div class="cs-i"><div class="cs-l">Брокер</div><div class="cs-v g">'+fN(d.broker_fee)+'</div></div><div class="cs-i"><div class="cs-l">Итого</div><div class="cs-v">'+fN(d.service_fee)+'</div></div></div>';
+    G('deBody').appendChild(dc);
+  });
+}
+
+// ── USERS ─────────────────────────────────────────────────────────────
+async function renderUsers() {
+  const {data:users}=await db.from('profiles').select('*').order('created_at',{ascending:false});
+  if(!users||!users.length) { G('uBody').innerHTML='<div class="empty"><div class="empty-i">👥</div><div class="empty-t">Нет пользователей</div></div>'; return; }
+  const tbl=document.createElement('div'); tbl.className='tbl-w';
+  let h='<table><thead><tr><th>Имя</th><th>Роль</th><th>WhatsApp</th></tr></thead><tbody>';
+  users.forEach(u=>{
+    const rc=u.role==='admin'?'b-platform':u.role==='broker'?'b-taken':'b-offered';
+    const rl=u.role==='admin'?'Администратор':u.role==='broker'?'Брокер':'Менеджер банка';
+    const wa=u.whatsapp?'<a class="wa" href="https://wa.me/'+u.whatsapp.replace(/\D/g,'')+'" target="_blank">WA</a>':'—';
+    h+='<tr><td><strong>'+(u.full_name||'—')+'</strong></td><td><span class="badge '+rc+'">'+rl+'</span></td><td>'+wa+'</td></tr>';
+  });
+  h+='</tbody></table>';
+  tbl.innerHTML=h; G('uBody').innerHTML=''; G('uBody').appendChild(tbl);
+}
+
+// ── FILES ─────────────────────────────────────────────────────────────
+function handleFiles(files) {
+  PF=[...files];
+  G('fList').innerHTML='';
+  [...files].forEach(f=>{ const d=document.createElement('div'); d.className='fi-item'; d.innerHTML='📎 '+f.name+' <span style="color:var(--t3);font-size:11px">'+(f.size/1024).toFixed(1)+'KB</span>'; G('fList').appendChild(d); });
+}
+
+// ── CALLS ─────────────────────────────────────────────────────────────
+const CALL_RESULTS = {
+  success:   {l:'Успешный',      c:'b-offered', e:'✅'},
+  no_answer: {l:'Не ответил',    c:'b-new',     e:'📵'},
+  callback:  {l:'Перезвонить',   c:'b-taken',   e:'🔄'},
+  rejected:  {l:'Отказался',     c:'b-rejected',e:'❌'},
+  interested:{l:'Заинтересован', c:'b-approved',e:'🔥'},
+};
+
+async function renderCalls() {
+  let q=db.from('calls').select('*').order('created_at',{ascending:false});
+  if(PR.role==='broker') q=q.eq('broker_id',ME.id);
+  const {data:calls}=await q;
+  G('cCnt').textContent=(calls||[]).length+' звонков';
+  const cb=G('cBody'); cb.innerHTML='';
+  if(!calls||!calls.length) {
+    cb.innerHTML='<div class="empty"><div class="empty-i">📞</div><div class="empty-t">Звонков нет</div><div class="empty-s">Добавьте первый звонок</div></div>';
+    return;
+  }
+  calls.forEach(c=>{
+    const res=CALL_RESULTS[c.result]||{l:c.result,c:'b-new',e:'📞'};
+    const card=document.createElement('div');
+    card.className='lc';
+    card.style.cursor='default';
+    const top=document.createElement('div'); top.className='lc-top';
+    const nd=document.createElement('div');
+    const nm=document.createElement('div'); nm.className='lc-nm'; nm.textContent=res.e+' '+(c.client_name||'—');
+    const dt=document.createElement('div'); dt.className='lc-dt';
+    dt.textContent=fD(c.created_at)+(c.phone?' · '+c.phone:'')+(c.duration?' · '+c.duration+' мин':'');
+    nd.appendChild(nm); nd.appendChild(dt);
+    top.appendChild(nd);
+    const meta=document.createElement('div'); meta.className='lc-meta';
+    const b=document.createElement('span'); b.className='badge '+res.c; b.textContent=res.l;
+    meta.appendChild(b);
+    card.appendChild(top); card.appendChild(meta);
+    if(c.comment) {
+      const cm=document.createElement('div');
+      cm.style.cssText='margin-top:10px;font-size:13px;color:var(--t2);font-weight:600';
+      cm.textContent='💬 '+c.comment;
+      card.appendChild(cm);
+    }
+    cb.appendChild(card);
+  });
+}
+
+async function createCall() {
+  const name=G('clNm').value.trim();
+  if(!name) { toast('Введите имя клиента','err'); return; }
+  const {error}=await db.from('calls').insert({
+    client_name:name, phone:G('clPh').value.trim(),
+    result:G('clRs').value, duration:G('clDr').value||null,
+    comment:G('clCm').value.trim(), broker_id:ME.id
+  });
+  if(error) { toast('Ошибка: '+error.message,'err'); return; }
+  toast('✓ Звонок сохранён');
+  closeM('mCall');
+  ['clNm','clPh','clDr','clCm'].forEach(id=>G(id).value='');
+  if(G('pg-calls').classList.contains('on')) await renderCalls();
+}
+
+// ── NOTIFICATIONS (LOCAL) ─────────────────────────────────────────────
+let NOTIFS = JSON.parse(localStorage.getItem('brokeros_notifs')||'[]');
+
+function addNotif(text, type='info') {
+  const n={id:Date.now(), text, type, time:new Date().toISOString(), read:false};
+  NOTIFS.unshift(n);
+  if(NOTIFS.length>100) NOTIFS=NOTIFS.slice(0,100);
+  localStorage.setItem('brokeros_notifs', JSON.stringify(NOTIFS));
+  showNotifDot();
+  // Browser Push notification
+  if(Notification.permission==='granted') {
+    new Notification('BrokerOS', {body:text, icon:'icon-192.png'});
+  }
+  toast(text, type==='error'?'err':type==='ok'?'ok':'info');
+}
+
+function showNotifDot() {
+  const d=G('notifDot'); if(d) d.style.display='block';
+}
+function clearNotifDot() {
+  NOTIFS=NOTIFS.map(n=>({...n,read:true}));
+  localStorage.setItem('brokeros_notifs',JSON.stringify(NOTIFS));
+  const d=G('notifDot'); if(d) d.style.display='none';
+}
+
+function renderNotifs() {
+  const nb=G('nBody'); if(!nb) return;
+  if(!NOTIFS.length) { nb.innerHTML='<div class="empty"><div class="empty-i">🔔</div><div class="empty-t">Уведомлений нет</div></div>'; return; }
+  nb.innerHTML='';
+  NOTIFS.forEach(n=>{
+    const d=document.createElement('div');
+    d.style.cssText='background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px'+(n.read?'':';border-left:3px solid var(--blue)');
+    const ico=n.type==='ok'?'✅':n.type==='error'?'❌':'🔔';
+    d.innerHTML='<div style="font-size:20px;flex-shrink:0">'+ico+'</div><div><div style="font-size:14px;font-weight:700">'+n.text+'</div><div style="font-size:11px;color:var(--t3);margin-top:4px;font-weight:600">'+new Date(n.time).toLocaleString('ru-RU')+'</div></div>';
+    nb.appendChild(d);
+  });
+}
+
+async function requestPushPermission() {
+  if('Notification' in window && Notification.permission==='default') {
+    const p=await Notification.requestPermission();
+    if(p==='granted') addNotif('🔔 Push уведомления включены!','ok');
+  }
+}
+
+// ── ROUND-ROBIN BROKER ASSIGNMENT ─────────────────────────────────────
+async function getNextBroker() {
+  const {data:brokers}=await db.from('profiles').select('id,full_name,whatsapp').eq('role','broker');
+  if(!brokers||!brokers.length) return null;
+  // Берём брокера с наименьшим количеством активных лидов
+  const counts=await Promise.all(brokers.map(async b=>{
+    const {count}=await db.from('leads').select('*',{count:'exact',head:true})
+      .eq('assigned_broker',b.id).neq('status','closed').neq('status','rejected');
+    return {...b, count:count||0};
+  }));
+  counts.sort((a,b)=>a.count-b.count);
+  return counts[0];
+}
+
+async function assignLeadToBroker(leadId, brokerId, brokerName, brokerWA, leadName, leadAmount) {
+  await db.from('leads').update({assigned_broker:brokerId, status:'taken'}).eq('id',leadId);
+  // Уведомление в CRM
+  addNotif('👤 Лид "'+leadName+'" назначен брокеру '+brokerName,'info');
+  // WhatsApp брокеру
+  if(brokerWA) {
+    const txt=encodeURIComponent(
+      '👤 *BrokerOS — Вам назначен лид*\n\n'+
+      '📋 Клиент: '+leadName+'\n'+
+      '💰 Сумма: '+new Intl.NumberFormat('ru-KZ').format(leadAmount||0)+' ₸\n'+
+      '⚡ Приступайте к работе в CRM'
+    );
+    window.open('https://wa.me/'+brokerWA.replace(/\D/g,'')+`?text=${txt}`,'_blank');
+  }
+}
+
+// ── HISTORY LOG ───────────────────────────────────────────────────────
+async function addLeadHistory(leadId, action) {
+  await db.from('lead_history').insert({
+    lead_id:leadId, action, user_id:ME.id, user_name:PR.full_name||ME.email
+  }).catch(()=>{});
+}
+
+async function renderLeadHistory(leadId, container) {
+  const {data:hist}=await db.from('lead_history').select('*').eq('lead_id',leadId).order('created_at',{ascending:false});
+  if(!hist||!hist.length) return;
+  const wrap=document.createElement('div'); wrap.style.marginTop='16px';
+  const title=document.createElement('div');
+  title.style.cssText='font-size:11px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px';
+  title.textContent='История изменений';
+  wrap.appendChild(title);
+  hist.forEach(h=>{
+    const item=document.createElement('div');
+    item.style.cssText='display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;font-size:13px';
+    item.innerHTML='<div style="width:6px;height:6px;border-radius:50%;background:var(--blue3);margin-top:5px;flex-shrink:0"></div>'+
+      '<div><span style="font-weight:700">'+h.action+'</span> <span style="color:var(--t3)">· '+h.user_name+' · '+new Date(h.created_at).toLocaleString('ru-RU')+'</span></div>';
+    wrap.appendChild(item);
+  });
+  container.appendChild(wrap);
+}
+
+// ── REALTIME ──────────────────────────────────────────────────────────
+function setupRT() {
+  db.channel('brokeros')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'leads'},()=>{
+      addNotif('🔔 Новый лид поступил в систему!','info');
+      if(G('pg-leads').classList.contains('on')) loadLeads();
+      if(G('pg-dash').classList.contains('on')) renderDash();
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'applications'},()=>{
+      if(PR.role==='bank') addNotif('🏦 Новая заявка в ваш банк!','info');
+      if(G('pg-apps').classList.contains('on')) renderApps();
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'applications'},(payload)=>{
+      const st=payload.new?.status;
+      const stLabels={in_progress:'В работе',offered:'Получен офер от банка',rejected:'Отказ по заявке',closed:'Заявка закрыта'};
+      if(st && stLabels[st]) addNotif('📋 Заявка: '+stLabels[st],'info');
+      if(G('pg-apps').classList.contains('on')) renderApps();
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'offers'},(payload)=>{
+      if(PR.role==='broker') addNotif('🏦 Новый ответ от банка по заявке!','info');
+      if(G('pg-apps').classList.contains('on')) renderApps();
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'leads'},(payload)=>{
+      const st=payload.new?.status;
+      const stLabels={taken:'Лид взят в работу',sent:'Лид отправлен в банк',offered:'Получен офер',closed:'Лид закрыт'};
+      if(st && stLabels[st]) addNotif('📊 '+stLabels[st],'info');
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'deals'},()=>{
+      addNotif('🎉 Сделка закрыта!','ok');
+      if(G('pg-deals').classList.contains('on')) renderDeals();
+    })
+    .subscribe();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    db=window.supabase.createClient(SURL,SKEY);
+    const {data:{session}}=await db.auth.getSession();
+    setTimeout(()=>{ G('splash').classList.add('hide'); setTimeout(()=>G('splash').style.display='none',700); },1800);
+    if(session?.user) { await loadUser(session.user); }
+    else { setTimeout(()=>G('login').classList.add('show'),1800); }
+  } catch(e) {
+    console.error(e); G('splash').style.display='none'; G('login').classList.add('show');
+  }
+}
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(init,100));
+else setTimeout(init,100);
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+</script>
+</body>
+</html>
