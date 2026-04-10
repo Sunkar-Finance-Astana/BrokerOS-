@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrokerOS — CRM для брокеров</title>
+
+<style>
+body {
+  margin:0;
+  font-family:'Nunito', sans-serif;
+  background: radial-gradient(circle at top, #050d1e, #020617);
+  color:#fff;
+}
+
+/* HERO */
+.hero {
+  padding:60px 20px;
+  text-align:center;
+}
+
+.logo img {
+  height:60px;
+  margin-bottom:15px;
+  filter: drop-shadow(0 10px 25px rgba(26,109,255,.6));
+}
+
+.hero h1 {
+  font-size:28px;
+  margin-bottom:12px;
+}
+
+.hero p {
+  opacity:.7;
+  margin-bottom:25px;
+}
+
+.btn {
+  padding:14px 20px;
+  border-radius:14px;
+  border:none;
+  background:linear-gradient(135deg,#1a6dff,#00c2ff);
+  color:#fff;
+  font-weight:700;
+  margin:5px;
+}
+
+/* FEATURES */
+.features {
+  padding:20px;
+}
+
+.card {
+  background: #0a1628;
+  padding:18px;
+  border-radius:18px;
+  margin-bottom:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+
+/* STEPS */
+.steps {
+  padding:30px 20px;
+}
+
+/* CTA */
+.cta {
+  padding:30px 20px;
+  text-align:center;
+}
+
+.cta-box {
+  background: linear-gradient(135deg,#1a6dff,#00c2ff);
+  padding:25px;
+  border-radius:20px;
+}
+
+/* FORM */
+.form {
+  padding:20px;
+}
+
+input {
+  width:100%;
+  padding:14px;
+  margin-bottom:12px;
+  border-radius:12px;
+  border:none;
+  background:#020617;
+  color:#fff;
+}
+
+/* FOOTER */
+.footer {
+  padding:20px;
+  text-align:center;
+  opacity:.6;
+}
+</style>
+</head>
+
+<body>
+
+<div class="hero">
+  <div class="logo">
+    <img src="icon-192.png">
+  </div>
+
+  <h1>CRM для кредитных брокеров</h1>
+  <p>Заявки, банки и клиенты — в одном приложении</p>
+
+  <button class="btn" onclick="scrollToForm()">Оставить заявку</button>
+</div>
+
+<div class="features">
+  <div class="card">🏦 Доступ к банкам Казахстана</div>
+  <div class="card">📊 Отслеживание заявок</div>
+  <div class="card">💰 Комиссия 70/30</div>
+  <div class="card">🔔 Уведомления</div>
+</div>
+
+<div class="steps">
+  <h2>Как это работает</h2>
+  <p>1. Регистрируетесь</p>
+  <p>2. Добавляете заявки</p>
+  <p>3. Получаете одобрение</p>
+</div>
+
+<div class="cta">
+  <div class="cta-box">
+    <h2>Начните зарабатывать</h2>
+    <button class="btn" onclick="scrollToForm()">Подключиться</button>
+  </div>
+</div>
+
+<div class="form" id="form">
+  <h2>Оставить заявку</h2>
+
+  <input id="company" placeholder="Компания">
+  <input id="name" placeholder="ФИО">
+  <input id="phone" placeholder="Телефон">
+  <input id="city" placeholder="Город">
+
+  <button class="btn" onclick="sendToWhatsApp()">Отправить</button>
+</div>
+
+<div class="footer">
+  WhatsApp: +7 775 640 18 92
+</div>
+
+<script>
+function scrollToForm(){
+  document.getElementById("form").scrollIntoView({behavior:"smooth"});
+}
+
+function sendToWhatsApp(){
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+
+  if(!name || !phone){
+    alert("Заполни ФИО и телефон");
+    return;
+  }
+
+  const text = encodeURIComponent(
+    "Заявка BrokerOS:\n\n" +
+    "ФИО: " + name + "\n" +
+    "Телефон: " + phone
+  );
+
+  window.open("https://wa.me/77756401892?text=" + text, "_blank");
+}
+</script>
+
+</body>
+</html>
